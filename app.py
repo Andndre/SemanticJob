@@ -1,3 +1,7 @@
+from dotenv import load_dotenv
+load_dotenv()
+
+import os
 from flask import Flask, render_template
 from SPARQLWrapper import SPARQLWrapper, JSON
 
@@ -5,7 +9,7 @@ from SPARQLWrapper import SPARQLWrapper, JSON
 app = Flask(__name__)
 
 # Konfigurasi GraphDB
-GRAPHDB_ENDPOINT = "http://andndre:7200/repositories/lokerku" 
+GRAPHDB_ENDPOINT = os.getenv("GRAPHDB_ENDPOINT") 
 
 # Fungsi untuk mengambil data lowongan pekerjaan dari GraphDB
 def get_jobs():
@@ -46,3 +50,4 @@ def home():
 # Menjalankan aplikasi Flask
 if __name__ == "__main__":
     app.run(debug=True)
+
