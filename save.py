@@ -2,6 +2,10 @@ from rdflib import Graph, Namespace, Literal, RDF, URIRef
 import requests
 from bs4 import BeautifulSoup
 from urllib.parse import quote
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Namespace untuk RDF
 EX = Namespace("http://example.org/ontology/")
@@ -55,10 +59,10 @@ def scrape_kitalulus():
     soup = BeautifulSoup(response.text, "html.parser")
 
     job_elements = soup.find_all("h3", class_="TextStyled__H3-sc-18vo2dc-3 eHZQKp")
-	
+    
     if not job_elements:
         return
-	
+    
     for job_element in job_elements:
         job_title = extract_text(job_element)
         company_element = job_element.find_next("p", class_="TextStyled__Text-sc-18vo2dc-0 kaIrsv")
@@ -109,7 +113,7 @@ scrape_kemnaker()
 scrape_kitalulus()
 
 # URL repository GraphDB
-graphdb_url = "http://andndre:7200/repositories/lokerku/statements"
+graphdb_url = os.getenv("GRAPHDB_ENDPOINT")
 
 # Mengunggah data RDF ke GraphDB
 upload_to_graphdb_via_sparql(rdf_graph, graphdb_url)
