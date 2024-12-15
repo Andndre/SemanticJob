@@ -28,39 +28,6 @@
         nav a:hover {
             text-decoration: underline;
         }
-        .slider {
-            max-width: 900px;
-            margin: 20px auto;
-            position: relative;
-            overflow: hidden;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-        .slides {
-            display: flex;
-            transition: transform 0.5s ease-in-out;
-        }
-        .slides img {
-            width: 100%;
-            height: 300px;
-            object-fit: cover;
-        }
-        .dots {
-            text-align: center;
-            margin-top: 10px;
-        }
-        .dots button {
-            background-color: #ccc;
-            border: none;
-            width: 10px;
-            height: 10px;
-            margin: 0 5px;
-            border-radius: 50%;
-            cursor: pointer;
-        }
-        .dots button.active {
-            background-color: #007bff;
-        }
         .container {
             max-width: 900px;
             margin: 20px auto;
@@ -109,7 +76,6 @@
         }
         .job-company,
         .job-location,
-        .job-qualification,
         .job-salary {
             font-size: 14px;
             color: #555;
@@ -131,7 +97,6 @@
         </div>
     </nav>
 
-
     <!-- Job Listings Section -->
     <div id="jobs" class="container">
         <h1>Job Listings</h1>
@@ -142,13 +107,9 @@
         </form>
         {% for job in jobs %}
             <div class="job-listing">
-                <p class="source">Source: {{ job.source }}</p>
-                <a href="{{ job.url if 'url' in job else '#' }}" target="_blank" class="job-title">{{ job.title }}</a>
+                <a href="{{ job.job_url if 'job_url' in job else '#' }}" target="_blank" class="job-title">{{ job.title }}</a>
                 <p class="job-company">Company: {{ job.company }}</p>
                 <p class="job-location">Location: {{ job.location }}</p>
-                {% if 'qualification' in job %}
-                    <p class="job-qualification">Qualification: {{ job.qualification }}</p>
-                {% endif %}
                 {% if 'salary' in job %}
                     <p class="job-salary">Salary: {{ job.salary }}</p>
                 {% endif %}
@@ -156,27 +117,4 @@
         {% endfor %}
     </div>
 </body>
-<script>
-    let currentIndex = 0;
-    const slides = document.querySelector(".slides");
-    const dots = document.querySelectorAll(".dots button");
-
-    function showSlide(index) {
-        slides.style.transform = `translateX(-${index * 100}%)`;
-        dots.forEach(dot => dot.classList.remove("active"));
-        dots[index].classList.add("active");
-    }
-
-    dots.forEach((dot, idx) => {
-        dot.addEventListener("click", () => {
-            currentIndex = idx;
-            showSlide(currentIndex);
-        });
-    });
-
-    setInterval(() => {
-        currentIndex = (currentIndex + 1) % dots.length;
-        showSlide(currentIndex);
-    }, 5000);
-</script>
 </html>
