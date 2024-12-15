@@ -72,6 +72,44 @@ def scrape_kemnaker():
         job = Job(job_title, company, url, salary)
         job.to_rdf()
 
+def scrape_kemnaker_with_keyword(keyword):
+    url = f"https://karirhub.kemnaker.go.id/lowongan-dalam-negeri/lowongan?filters=keyword:%23{quote(keyword)}"
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36"
+    }
+    response = requests.get(url, headers=headers)
+    response.raise_for_status()
+    soup = BeautifulSoup(response.text, "html.parser")
+
+    job_elements = soup.find_all("sisnaker-element-karirhub-domestic-vacancy-card-web")
+
+    jobs = []
+    for job_element in job_elements:
+        job_title_element = job_element.find("div", class_="text-sm font-bold text-grey-700")
+        job_title = extract_text(job_title_element)
+        
+        company_element = job_element.find("div", class_="text-sm text-grey-700")
+        location_element = job_element.find("div", class_="text-xs text-grey-500")
+        salary_element = job_element.find("div", class_="font-medium text-grey-700")
+
+        company_name = extract_text(company_element, "No company")
+        location = extract_text(location_element, "No location")
+        salary = extract_text(salary_element, "No salary")
+        if "IDR" not in salary:
+            salary = "No salary"
+
+        job_url = url
+        job = {
+            "title": job_title,
+            "salary": salary,
+            "company": company_name,
+            "location": location,
+            "job_url": job_url
+        }
+        jobs.append(job)
+    
+    return jobs
+
 # Helper function to extract text or return a default value
 def extract_text(element, default="No data"):
     return element.text.strip() if element else default
@@ -113,6 +151,48 @@ def scrape_kitalulus():
         company = Company(company_name, location)
         job = Job(job_title, company, job_url, salary)
         job.to_rdf()
+
+def scrape_kitalulus_with_keyword(keyword):
+    url = f"https://www.kitalulus.com/lowongan?keyword={quote(keyword)}"
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36"
+    }
+    
+    response = requests.get(url, headers=headers)
+    response.raise_for_status()
+    soup = BeautifulSoup(response.text, "html.parser")
+
+    job_elements = soup.find_all("div", class_="CardRectangleStyled__Container-sc-1lom4v1-0 iwlPnJ")
+    
+    jobs = []
+    for job_element in job_elements:
+        job_title_element = job_element.find("h3", class_="TextStyled__H3-sc-18vo2dc-3 eHZQKp")
+        job_title = extract_text(job_title_element)
+        
+        a_tag = job_element.find("a", href=True)
+        job_url = "https://www.kitalulus.com" + a_tag["href"] if a_tag else "No URL"
+
+        company_element = job_element.find("p", class_="TextStyled__Text-sc-18vo2dc-0 kaIrsv")
+        location_element = job_element.find("p", class_="CardRectangleStyled__Text-sc-1lom4v1-8 drzZmb")
+        qualification_element = location_element.find_next("p", class_="CardRectangleStyled__Text-sc-1lom4v1-8 drzZmb") if location_element else None
+        salary_element = qualification_element.find_next("p", class_="CardRectangleStyled__Text-sc-1lom4v1-8 drzZmb") if qualification_element else None
+
+        company_name = extract_text(company_element, "No company")
+        location = extract_text(location_element, "No location")
+        salary = extract_text(salary_element, "No salary")
+        if "Rp" not in salary:
+            salary = "No salary"
+
+        job = {
+            "title": job_title,
+            "salary": salary,
+            "company": company_name,
+            "location": location,
+            "job_url": job_url
+        }
+        jobs.append(job)
+    
+    return jobs
 
 def delete_all_jobs_and_companies(sparql_endpoint_url):
     # Define the SPARQL Update query to delete all instances of Job and Company
