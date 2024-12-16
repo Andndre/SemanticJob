@@ -4,13 +4,16 @@ load_dotenv()
 import os
 from flask import Flask, render_template, request, jsonify
 from SPARQLWrapper import SPARQLWrapper, JSON
+from flask_cors import CORS, cross_origin
 from save import scrape_kemnaker, scrape_kitalulus, delete_all_jobs_and_companies, upload_to_graphdb_via_sparql, rdf_graph, scrape_kemnaker_with_keyword, scrape_kitalulus_with_keyword
 
 # Konfigurasi aplikasi Flask
 app = Flask(__name__)
+cors = CORS(app)
+app.config['CORS_HEADERS'] = 'Content-Type'
 
 # Konfigurasi GraphDB
-GRAPHDB_ENDPOINT = os.getenv("GRAPHDB_ENDPOINT")
+GRAPHDB_ENDPOINT = os.getenv("GRAPHDB_ENDPOINT") + '/repositories/lokerku'
 
 def get_jobs():
     sparql = SPARQLWrapper(GRAPHDB_ENDPOINT)
@@ -59,15 +62,30 @@ def home():
         jobs = get_jobs()
     return render_template("index.html", jobs=jobs)
 
-# Route untuk melakukan scraping dan mengunggah data ke GraphDB
-@app.route("/scrape", methods=["GET"])
-def scrape():
-    scrape_kemnaker()
-    scrape_kitalulus()
-    delete_all_jobs_and_companies(GRAPHDB_ENDPOINT + "/statements")
-    upload_to_graphdb_via_sparql(rdf_graph, GRAPHDB_ENDPOINT + "/statements")
-    return jsonify({'message': 'Scraping completed'}), 200
+@app.route("/api/jobs", methods=["GET"])
+def api_home():
+    page = int(request.args.get("page", 1))
+    total_per_page = int(request.args.get("total_per_page", 10))
+    jobs = get_jobs()
+    start = (page - 1) * total_per_page
+    end = start + total_per_page
+    paginated_jobs = jobs[start:end]
+    return jsonify(paginated_jobs)
+
+# Route REST API untuk mencari lowongan pekerjaan berdasarkan kata kunci
+@app.route("/api/search", methods=["GET"])
+def api_search():
+    keyword = request.args.get("keyword", "").strip()
+    if keyword:
+        jobs = search_jobs(keyword)
+        return jsonify(jobs)
+    else:
+        return jsonify([])
 
 # Menjalankan aplikasi Flask
 if __name__ == "__main__":
-    app.run(debug=True)
+    scrape_kemnaker()
+    scrape_kitalulus()
+    # delete_all_jobs_and_companies(GRAPHDB_ENDPOINT + "/statements")
+    upload_to_graphdb_via_sparql(rdf_graph, GRAPHDB_ENDPOINT + "/statements")
+    app.run(host='0.0.0.0', port=5000, debug=True)
