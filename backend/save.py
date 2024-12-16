@@ -27,11 +27,12 @@ class Company:
         return company_uri
 
 class Job:
-    def __init__(self, title, company, job_url, salary="No salary"):
+    def __init__(self, title, company, job_url, source, salary="No salary"):
         self.title = title
         self.company = company
         self.salary = salary
         self.job_url = job_url
+        self.source = source
 
     def to_rdf(self):
         job_uri = URIRef(f"http://example.org/job/{quote(self.title.replace(' ', '_'))}")
@@ -40,6 +41,7 @@ class Job:
         rdf_graph.add((job_uri, EX.salary, Literal(self.salary)))
         rdf_graph.add((job_uri, EX.company, self.company.to_rdf()))
         rdf_graph.add((job_uri, EX.job_url, Literal(self.job_url)))
+        rdf_graph.add((job_uri, EX.source, Literal(self.source)))
         return job_uri
 
 # Scraping dari KarirHub Kemnaker
@@ -69,7 +71,7 @@ def scrape_kemnaker():
             salary = "No salary"
 
         company = Company(company_name, location)
-        job = Job(job_title, company, url, salary)
+        job = Job(job_title, company, url, "Kemnaker", salary)
         job.to_rdf()
 
 def scrape_kemnaker_with_keyword(keyword):
