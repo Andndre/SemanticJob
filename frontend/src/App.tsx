@@ -25,8 +25,10 @@ function App() {
   return (
     <>
       <AppSidebar />
-      <main>
-        <SidebarTrigger />
+      <main className='flex-1'>
+        <nav className='bg-blue-500 text-white p-4 flex justify-between items-center w-full'>
+          <SidebarTrigger />
+        </nav>
       </main>
     </>
     // <div className="min-h-screen bg-gray-100">

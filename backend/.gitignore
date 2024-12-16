@@ -1,3 +1,4 @@
 .env
 experiments.ipynb
 __pycache__/
+users.db
