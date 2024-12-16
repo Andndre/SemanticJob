@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from SPARQLWrapper import SPARQLWrapper, JSON
-from save import scrape_kemnaker, scrape_kitalulus, delete_all_jobs_and_companies, upload_to_graphdb_via_sparql, rdf_graph, scrape_kemnaker_with_keyword, scrape_kitalulus_with_keyword
+from save import scrape_kemnaker, scrape_kitalulus, delete_all_jobs_and_companies, upload_to_graphdb_via_sparql, rdf_graph, scrape_kemnaker_with_keyword, scrape_kitalulus_with_keyword, scrape_jobstreet
 
 # Konfigurasi aplikasi Flask
 app = Flask(__name__)
@@ -52,9 +52,10 @@ def get_jobs():
 
 # Fungsi untuk mencari lowongan pekerjaan berdasarkan kata kunci
 def search_jobs(keyword):
+    jobs_jobstreet = scrape_jobstreet(keyword)
     jobs_kemnaker = scrape_kemnaker_with_keyword(keyword)
     jobs_kitalulus = scrape_kitalulus_with_keyword(keyword)
-    return jobs_kemnaker + jobs_kitalulus
+    return jobs_jobstreet + jobs_kemnaker + jobs_kitalulus
 
 def get_db():
     db = getattr(g, '_database', None)
@@ -176,7 +177,7 @@ def home():
         jobs = search_jobs(keyword)
     else:
         jobs = get_jobs()
-    return render_template("index.html", jobs=jobs)
+    return render_template("index.html", jobs=jobs, keyword=keyword)
 
 # Menjalankan aplikasi Flask
 if __name__ == "__main__":

@@ -194,6 +194,38 @@ def scrape_kitalulus_with_keyword(keyword):
     
     return jobs
 
+def scrape_jobstreet(keyword):
+    url = f"https://id.jobstreet.com/id/{quote(keyword.replace(' ', '-'))}-jobs"
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36"
+    }
+    response = requests.get(url, headers=headers)
+    response.raise_for_status()
+
+    soup = BeautifulSoup(response.content, 'html.parser')
+
+    jobs = []
+    for item in soup.find_all('article', class_='_1unphw40 _1unphw41 tcmsgw8n tcmsgw8o tcmsgw7j tcmsgw7k tcmsgwav tcmsgwaw tcmsgw9r tcmsgw9s tcmsgwh tcmsgw67 tcmsgw5f s57onkb s57onk9 s57onka _1siu89c18 _1siu89c1b tcmsgw33 tcmsgw36'):
+        job_url = 'https://id.jobstreet.com' + item.find('a')['href']
+        title = item.find('h3').text.strip()
+        company_name = item.find('a', {'data-type': 'company'}).text.strip()
+        location = item.find('a', {'data-type': 'location'}).text.strip()
+        salary = extract_text(item.find('span', {'data-automation': 'jobSalary'}), "No salary")
+
+        job = Job(title=title, company=Company(name=company_name, location=location), job_url=job_url, salary=salary)
+        job.to_rdf()
+
+        jobs.append({
+            "title": title,
+            "company": company_name,
+            "location": location,
+            "salary": salary,
+            "job_url": job_url
+        })
+
+    return jobs
+
+
 def delete_all_jobs_and_companies(sparql_endpoint_url):
     # Define the SPARQL Update query to delete all instances of Job and Company
     sparql_delete_query = """

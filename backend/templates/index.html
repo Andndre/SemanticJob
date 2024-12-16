@@ -102,7 +102,7 @@
         <h1>Job Listings</h1>
         <!-- Form Pencarian -->
         <form method="GET" action="/">
-            <input type="text" name="query" placeholder="Search jobs by title, company, or location..." />
+            <input type="text" name="query" placeholder="Search jobs by title, company, or location..." value="{{ keyword if keyword else '' }}" />
             <button type="submit">Search</button>
         </form>
         {% for job in jobs %}
