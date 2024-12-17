@@ -160,6 +160,12 @@ def scrape_jobstreet(keyword=None):
             location = extract_text(item.find('span', {'data-automation': 'jobCardLocation'}), "Invalid")
             salary = extract_text(item.find('span', {'data-automation': 'jobSalary'}), "Secret")
 
+            if salary != "Secret":
+                # remove " per month"
+                salary = salary.replace(" per month", "")
+                salary = salary.replace("IDR", "Rp")
+                salary = salary.replace(",", ".")
+
             company = Company(name=company_name, location=location)
             job = Job(title=title, company=company, job_url=job_url, source="Jobstreet", salary=salary)
             job.to_rdf()
@@ -244,10 +250,4 @@ def upload_to_graphdb_via_sparql(graph, sparql_endpoint_url):
 
 if __name__ == "__main__":
     graphdb_url = os.getenv("GRAPHDB_ENDPOINT")  + '/repositories/lokerku' + "/statements"
-
-    # URL repository GraphDB
-    # Menghapus semua instance Job dan Company dari GraphDB
     delete_all_jobs_and_companies(graphdb_url)
-
-    # Mengunggah data RDF ke GraphDB
-    # upload_to_graphdb_via_sparql(rdf_graph, graphdb_url)
