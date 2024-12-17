@@ -22,6 +22,8 @@ import {
 } from "@/components/ui/card";
 import { LoadingSpinner } from "@/components/custom/LoadingSpinner";
 import vintage from "@/images/undraw_vintage.svg";
+import { Checkbox } from "@/components/ui/checkbox";
+import { useState } from "react";
 
 function App() {
   const auth = useAuth();
@@ -90,7 +92,9 @@ function FormSearch() {
 }
 
 function LokerList() {
-  const { filterLocation, loading, filterSource, jobs, toggleLocationFilter, toggleSourceFilter, searched } = useLokerAPI();
+  const { filterLocation, loading, filterSource, jobs, toggleLocationFilter, toggleSourceFilter, toggleAllLocationFilters, toggleAllSourceFilters, searched } = useLokerAPI();
+  const [allLocationsChecked, setAllLocationsChecked] = useState(true);
+  const [allSourcesChecked, setAllSourcesChecked] = useState(true);
 
   const handleLocationChange = (location: string) => {
     toggleLocationFilter(location);
@@ -98,6 +102,16 @@ function LokerList() {
 
   const handleSourceChange = (source: string) => {
     toggleSourceFilter(source);
+  };
+
+  const handleAllLocationsChange = () => {
+    setAllLocationsChecked(!allLocationsChecked);
+    toggleAllLocationFilters(!allLocationsChecked);
+  };
+
+  const handleAllSourcesChange = () => {
+    setAllSourcesChecked(!allSourcesChecked);
+    toggleAllSourceFilters(!allSourcesChecked);
   };
 
   if (loading) {
@@ -134,23 +148,35 @@ function LokerList() {
           <Card>
             <CardContent className="pt-6">
               <h3 className="font-bold">Location</h3>
+              <div className="flex items-center">
+                <Checkbox
+                  checked={allLocationsChecked}
+                  onCheckedChange={handleAllLocationsChange}
+                />
+                <label className="ml-2">All Locations</label>
+              </div>
               {Object.keys(filterLocation).map((location) => (
-                <div key={location}>
-                  <input
-                    type="checkbox"
+                <div key={location} className="flex items-center">
+                  <Checkbox
                     checked={filterLocation[location]}
-                    onChange={() => handleLocationChange(location)}
+                    onCheckedChange={() => handleLocationChange(location)}
                   />
                   <label className="ml-2">{location}</label>
                 </div>
               ))}
               <h3 className="font-bold mt-4">Source</h3>
+              <div className="flex items-center">
+                <Checkbox
+                  checked={allSourcesChecked}
+                  onCheckedChange={handleAllSourcesChange}
+                />
+                <label className="ml-2">All Sources</label>
+              </div>
               {Object.keys(filterSource).map((source) => (
-                <div key={source}>
-                  <input
-                    type="checkbox"
+                <div key={source} className="flex items-center">
+                  <Checkbox
                     checked={filterSource[source]}
-                    onChange={() => handleSourceChange(source)}
+                    onCheckedChange={() => handleSourceChange(source)}
                   />
                   <label className="ml-2">{source}</label>
                 </div>
@@ -165,7 +191,6 @@ function LokerList() {
               (filterLocation[job.location]) &&
               (filterSource[job.source])
             ) {
-              console.log(filterLocation[job.location])
               return (
                 <a
                   href={job.job_url}

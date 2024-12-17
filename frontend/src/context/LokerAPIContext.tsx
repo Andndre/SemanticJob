@@ -11,7 +11,9 @@ interface LokerAPIContextType {
   filterSource: { [key: string]: boolean };
   toggleLocationFilter: (location: string) => void;
   toggleSourceFilter: (source: string) => void;
-	searched: boolean;
+  toggleAllLocationFilters: (checked: boolean) => void;
+  toggleAllSourceFilters: (checked: boolean) => void;
+  searched: boolean;
 }
 
 const LokerAPIContext = createContext<LokerAPIContextType | undefined>(
@@ -25,7 +27,7 @@ export const LokerAPIProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(false);
-	const [searched, setSearched] = useState(false);
+  const [searched, setSearched] = useState(false);
   const [filterLocation, setFilterLocation] = useState<{
     [key: string]: boolean;
   }>({});
@@ -35,9 +37,9 @@ export const LokerAPIProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const navigate = useNavigate();
   async function fetchJobs(query: string) {
-		setSearched(false);
-		setFilterSource({});
-		setFilterLocation({});
+    setSearched(false);
+    setFilterSource({});
+    setFilterLocation({});
     setLoading(true);
     try {
       const response = await axios.post(
@@ -67,7 +69,7 @@ export const LokerAPIProvider: React.FC<{ children: React.ReactNode }> = ({
 
       setFilterLocation(locations);
       setFilterSource(sources);
-			setSearched(true);
+      setSearched(true);
 
     } catch (error) {
       if (axios.isAxiosError(error) && error.response?.status === 401) {
@@ -98,6 +100,26 @@ export const LokerAPIProvider: React.FC<{ children: React.ReactNode }> = ({
     }));
   };
 
+  const toggleAllLocationFilters = (checked: boolean) => {
+    setFilterLocation((prev) => {
+      const newFilters = { ...prev };
+      Object.keys(newFilters).forEach((key) => {
+        newFilters[key] = checked;
+      });
+      return newFilters;
+    });
+  };
+
+  const toggleAllSourceFilters = (checked: boolean) => {
+    setFilterSource((prev) => {
+      const newFilters = { ...prev };
+      Object.keys(newFilters).forEach((key) => {
+        newFilters[key] = checked;
+      });
+      return newFilters;
+    });
+  };
+
   return (
     <LokerAPIContext.Provider
       value={{
@@ -108,7 +130,9 @@ export const LokerAPIProvider: React.FC<{ children: React.ReactNode }> = ({
         filterSource,
         toggleLocationFilter,
         toggleSourceFilter,
-				searched
+        toggleAllLocationFilters,
+        toggleAllSourceFilters,
+        searched
       }}
     >
       {children}
