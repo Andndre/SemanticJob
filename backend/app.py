@@ -7,11 +7,11 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from SPARQLWrapper import SPARQLWrapper, JSON
-from save import scrape_kemnaker, scrape_kitalulus, delete_all_jobs_and_companies, upload_to_graphdb_via_sparql, rdf_graph, scrape_kemnaker_with_keyword, scrape_kitalulus_with_keyword, scrape_jobstreet
+from save import search_and_store_jobs, delete_all_jobs_and_companies, upload_to_graphdb_via_sparql, rdf_graph
 
 # Konfigurasi aplikasi Flask
 app = Flask(__name__)
-cors = CORS(app)
+cors = CORS(app, supports_credentials=True)
 app.config['CORS_HEADERS'] = 'Content-Type'
 app.config['DATABASE'] = os.path.join(os.getcwd(), 'users.db')
 app.config['SECRET_KEY'] = os.urandom(24)
@@ -23,11 +23,12 @@ def get_jobs():
     sparql = SPARQLWrapper(GRAPHDB_ENDPOINT)
     query = """
     PREFIX ex: <http://example.org/ontology/>
-    SELECT DISTINCT ?title ?salary ?companyName ?location ?job_url WHERE {
+    SELECT DISTINCT ?title ?salary ?companyName ?location ?source ?job_url WHERE {
         ?job a ex:Job ;
              ex:title ?title ;
              ex:salary ?salary ;
              ex:company ?company ;
+             ex:source ?source ;
              ex:job_url ?job_url .
         ?company ex:name ?companyName ;
                  ex:location ?location .
@@ -42,20 +43,13 @@ def get_jobs():
         job = {
             "title": result["title"]["value"],
             "salary": result["salary"]["value"],
-            "companyName": result["companyName"]["value"],
+            "company": result["companyName"]["value"],
             "location": result["location"]["value"],
             "job_url": result["job_url"]["value"]
         }
         jobs.append(job)
         
     return jobs
-
-# Fungsi untuk mencari lowongan pekerjaan berdasarkan kata kunci
-def search_jobs(keyword):
-    jobs_jobstreet = scrape_jobstreet(keyword)
-    jobs_kemnaker = scrape_kemnaker_with_keyword(keyword)
-    jobs_kitalulus = scrape_kitalulus_with_keyword(keyword)
-    return jobs_jobstreet + jobs_kemnaker + jobs_kitalulus
 
 def get_db():
     db = getattr(g, '_database', None)
@@ -165,7 +159,7 @@ def api_home():
 def api_search():
     keyword = request.args.get("keyword", "").strip()
     if keyword:
-        jobs = search_jobs(keyword)
+        jobs = search_and_store_jobs(keyword)
         return jsonify(jobs)
     else:
         return jsonify([])
@@ -174,7 +168,7 @@ def api_search():
 def home():
     keyword = request.args.get("query", "").strip()
     if keyword:
-        jobs = search_jobs(keyword)
+        jobs = search_and_store_jobs(keyword)
     else:
         jobs = get_jobs()
     return render_template("index.html", jobs=jobs, keyword=keyword)
@@ -184,13 +178,6 @@ if __name__ == "__main__":
     print("Initializing database...")
     init_db()
     print("Database initialized")
-    print("Scraping data...")
-    scrape_kemnaker()
-    scrape_kitalulus()
-    print("Data scraped")
-    # delete_all_jobs_and_companies(GRAPHDB_ENDPOINT + "/statements")
-    print("Uploading data to GraphDB...")
-    upload_to_graphdb_via_sparql(rdf_graph, GRAPHDB_ENDPOINT + "/statements")
-    print("Data uploaded")
     print("Starting Flask app...")
     app.run(host='0.0.0.0', port=5000, debug=True)
+    

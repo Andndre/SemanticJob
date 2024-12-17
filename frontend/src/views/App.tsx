@@ -1,7 +1,7 @@
 // import React, { useState, useEffect } from 'react';
 // import { Job } from './types';
-import { AppSidebar } from '../components/custom/AppSidebar';
-import { SidebarTrigger } from '../components/ui/sidebar';
+import { AppSidebar } from '@/components/custom/AppSidebar';
+import { SidebarTrigger } from '@/components/ui/sidebar';
 
 function App() {
   // const [jobs, setJobs] = useState<Job[]>([]);
