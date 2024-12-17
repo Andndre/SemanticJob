@@ -1,6 +1,6 @@
 import { Job } from "@/types";
 import axios from "axios";
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 interface LokerAPIContextType {
@@ -81,10 +81,6 @@ export const LokerAPIProvider: React.FC<{ children: React.ReactNode }> = ({
       setLoading(false);
     }
   }
-
-  useEffect(() => {
-    // Ensure the component re-renders when filterLocation or filterSource changes
-  }, [filterLocation, filterSource]);
 
   const toggleLocationFilter = (location: string) => {
     setFilterLocation((prev) => ({

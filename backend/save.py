@@ -35,7 +35,7 @@ class Job:
         self.source = source
 
     def to_rdf(self):
-        job_uri = URIRef(f"http://example.org/job/{quote(self.title.replace(' ', '_'))}")
+        job_uri = URIRef(f"http://example.org/job/{self.job_url}")
         rdf_graph.add((job_uri, RDF.type, EX.Job))
         rdf_graph.add((job_uri, EX.title, Literal(self.title)))
         rdf_graph.add((job_uri, EX.salary, Literal(self.salary)))
@@ -242,12 +242,12 @@ def upload_to_graphdb_via_sparql(graph, sparql_endpoint_url):
     else:
         print(f"Gagal mengunggah data RDF melalui SPARQL: {response.status_code} {response.text}")
 
-# if __name__ == "__main__":
-#     graphdb_url = os.getenv("GRAPHDB_ENDPOINT")  + '/repositories/lokerku' + "/statements"
+if __name__ == "__main__":
+    graphdb_url = os.getenv("GRAPHDB_ENDPOINT")  + '/repositories/lokerku' + "/statements"
 
-#     # URL repository GraphDB
-#     # Menghapus semua instance Job dan Company dari GraphDB
-#     delete_all_jobs_and_companies(graphdb_url)
+    # URL repository GraphDB
+    # Menghapus semua instance Job dan Company dari GraphDB
+    delete_all_jobs_and_companies(graphdb_url)
 
-#     # Mengunggah data RDF ke GraphDB
-#     upload_to_graphdb_via_sparql(rdf_graph, graphdb_url)
+    # Mengunggah data RDF ke GraphDB
+    # upload_to_graphdb_via_sparql(rdf_graph, graphdb_url)
