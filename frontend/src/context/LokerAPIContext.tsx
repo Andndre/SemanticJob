@@ -61,6 +61,7 @@ export const LokerAPIProvider: React.FC<{ children: React.ReactNode }> = ({
       );
       const data = response.data as Job[];
 
+      console.log({data});
       // Filter out jobs with salary "Secret" and set minSalary and maxSalary
       const salaries = data
         .filter((job) => job.salary !== "Secret")
@@ -69,12 +70,15 @@ export const LokerAPIProvider: React.FC<{ children: React.ReactNode }> = ({
       let min = Infinity;
       let max = -Infinity;
       salaries.forEach((salary) => {
-        const parts = salary.replace(" – ", " - ").split(" - ").map((part) => {
+        const parts = salary.replace("–", "-").split("-").map((part) => {
+          console.log(part);
           return parseInt(part.replace("Rp", "").replace(/\s/g, "").replace(/\./g, ""), 10)
         });
         min = Math.min(min, ...parts);
         max = Math.max(max, ...parts);
       });
+
+      console.log(min, max);
 
       setMinSalary(min);
       setMaxSalary(max);

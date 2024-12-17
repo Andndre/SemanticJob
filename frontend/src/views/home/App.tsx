@@ -27,6 +27,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { DualRangeSlider } from "@/components/ui/dual-range-slider";
+import { convertToRupiah } from "@/lib/utils";
 
 function App() {
   const auth = useAuth();
@@ -112,7 +113,7 @@ function LokerList() {
   } = useLokerAPI();
   const [allLocationsChecked, setAllLocationsChecked] = useState(true);
   const [allSourcesChecked, setAllSourcesChecked] = useState(true);
-  const [includeSecretSalary, setIncludeSecretSalary] = useState(false);
+  const [includeSecretSalary, setIncludeSecretSalary] = useState(true);
 
   const handleLocationChange = (location: string) => {
     toggleLocationFilter(location);
@@ -161,6 +162,9 @@ function LokerList() {
   }
 
   console.log(isEmpty)
+  if (!isEmpty) {
+    console.log(jobs)
+  }
 
   return (
     <div className="flex flex-col md:flex-row gap-3 w-full text-start">
@@ -237,8 +241,8 @@ function LokerList() {
         )}
         {jobs.map((job, index) => {
           if (filterLocation[job.location] && filterSource[job.source]) {
-            const parts = job.salary.replace(" – ", " - ").split(" - ").map((part) => {
-              return parseInt(part.replace("Rp", "").replace(/\s/g, "").replace(/\./g, ""), 10)
+            const parts = job.salary.split("-").map((part) => {
+              return parseInt(part, 10)
             });
 
             const jobMinSalary = parts[0] || 0;
@@ -271,7 +275,7 @@ function LokerList() {
                         {job.salary === "Secret" ? (
                           <Badge variant={"destructive"}>{job.salary}</Badge>
                         ) : (
-                          <p>{job.salary}</p>
+                          <p>{convertToRupiah(job.salary)}</p>
                         )}
                       </div>
                       <div className="flex items-center space-x-2">

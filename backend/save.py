@@ -4,6 +4,7 @@ from bs4 import BeautifulSoup
 from urllib.parse import quote
 import os
 from dotenv import load_dotenv
+import re
 
 load_dotenv()
 
@@ -123,6 +124,9 @@ def scrape_kitalulus(keyword=None):
             if "Rp" not in salary:
                 salary = "Secret"
             
+            if salary != "Secret":
+                salary = re.sub(r"[^\d-]", "", salary)
+            
             company = Company(company_name, location)
             job = Job(job_title, company, job_url, "KitaLulus", salary)
             job.to_rdf()
@@ -135,7 +139,8 @@ def scrape_kitalulus(keyword=None):
                 "job_url": job_url,
                 "source": "KitaLulus"
             })
-        except Exception:
+        except Exception as e:
+            print(f"Error processing job element: {e}")
             continue
 
     return jobs
@@ -161,10 +166,8 @@ def scrape_jobstreet(keyword=None):
             salary = extract_text(item.find('span', {'data-automation': 'jobSalary'}), "Secret")
 
             if salary != "Secret":
-                # remove " per month"
-                salary = salary.replace(" per month", "")
-                salary = salary.replace("IDR", "Rp")
-                salary = salary.replace(",", ".")
+                salary = salary.replace("–", "-")
+                salary = re.sub(r"[^\d-]", "", salary)
 
             company = Company(name=company_name, location=location)
             job = Job(title=title, company=company, job_url=job_url, source="Jobstreet", salary=salary)
@@ -178,7 +181,8 @@ def scrape_jobstreet(keyword=None):
                 "job_url": job_url,
                 "source": "Jobstreet"
             })
-        except Exception:
+        except Exception as e:
+            print(f"Error processing job element: {e}")
             continue
 
     return jobs
