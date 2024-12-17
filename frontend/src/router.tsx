@@ -2,7 +2,7 @@ import { createBrowserRouter } from "react-router-dom";
 import App from "./views/App";
 import GuestLayout from "./views/layouts/GuestLayout";
 import AuthLayout from "./views/layouts/AuthLayout";
-import LoginPage from "./views/LoginPage";
+import LoginPage from "./views/login/LoginPage";
 
 const Router = createBrowserRouter([
   {

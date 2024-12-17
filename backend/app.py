@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from SPARQLWrapper import SPARQLWrapper, JSON
-from save import search_and_store_jobs, delete_all_jobs_and_companies, upload_to_graphdb_via_sparql, rdf_graph
+from save import search_and_store_jobs
 
 # Konfigurasi aplikasi Flask
 app = Flask(__name__)

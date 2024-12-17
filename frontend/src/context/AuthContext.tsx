@@ -4,7 +4,8 @@ import axios from 'axios';
 
 interface AuthContextType {
   user: string | null;
-  login: (username: string, password: string) => Promise<void>;
+  login: (username: string, password: string) => Promise<{ success: boolean, message: string }>;
+  register: (username: string, password: string) => Promise<{ success: boolean, message: string }>;
   logout: () => void;
   loading: boolean;
 }
@@ -27,27 +28,48 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(null);
         setLoading(false);
       });
-  }, []);
+  });
 
   const login = async (username: string, password: string) => {
     try {
+      setLoading(true);
       await axios.post('http://localhost:5000/api/login', { username, password }, { withCredentials: true });
       setUser(username);
       navigate('/');
-    } catch (error) {
+      return { success: true, message: 'Login successful' };
+    } catch (error: any) {
       console.error('Login failed', error);
-      throw error;
+      return { success: false, message: error.response.data.error };
+    } finally {
+      setLoading(false);
     }
   };
 
+  const register = async (username: string, password: string) => {
+    try {
+      setLoading(true);
+      await axios.post('http://localhost:5000/api/register', { username, password }, { withCredentials: true });
+      setUser(username);
+      navigate('/auth/login');
+      return { success: true, message: 'Registration successful' };
+    } catch (error: any) {
+      console.error('Register failed', error);
+      return { success: false, message: error.response.data.error };
+    } finally {
+      setLoading(false);
+    }
+  }
+
   const logout = async () => {
+    setLoading(true);
     await axios.post('http://localhost:5000/api/logout', {}, { withCredentials: true });
     setUser(null);
+    setLoading(false);
     navigate('/auth/login');
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, loading }}>
+    <AuthContext.Provider value={{ user, login, logout, loading, register }}>
       {children}
     </AuthContext.Provider>
   );
