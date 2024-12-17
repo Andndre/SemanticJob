@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/card";
 import { LoadingSpinner } from "@/components/custom/LoadingSpinner";
 import vintage from "@/images/undraw_vintage.svg";
+import notfound from "@/images/undraw_page_not_found.svg";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useState } from "react";
 
@@ -92,7 +93,17 @@ function FormSearch() {
 }
 
 function LokerList() {
-  const { filterLocation, loading, filterSource, jobs, toggleLocationFilter, toggleSourceFilter, toggleAllLocationFilters, toggleAllSourceFilters, searched } = useLokerAPI();
+  const {
+    filterLocation,
+    loading,
+    filterSource,
+    jobs,
+    toggleLocationFilter,
+    toggleSourceFilter,
+    toggleAllLocationFilters,
+    toggleAllSourceFilters,
+    searched,
+  } = useLokerAPI();
   const [allLocationsChecked, setAllLocationsChecked] = useState(true);
   const [allSourcesChecked, setAllSourcesChecked] = useState(true);
 
@@ -123,9 +134,7 @@ function LokerList() {
   }
 
   const isEmpty = jobs.every(
-    (job) =>
-      !(filterLocation[job.location]) ||
-      !(filterSource[job.source])
+    (job) => !filterLocation[job.location] || !filterSource[job.source]
   );
 
   if (isEmpty && !searched) {
@@ -186,17 +195,19 @@ function LokerList() {
         </div>
         <div className="flex flex-col gap-3 flex-1">
           <h2 className="text-lg font-bold">Hasil Pencarian</h2>
+          {isEmpty && (
+            <div>
+              <img src={notfound} alt="No data" className="w-1/2 mx-auto" />
+            </div>
+          )}
           {jobs.map((job, index) => {
-            if (
-              (filterLocation[job.location]) &&
-              (filterSource[job.source])
-            ) {
+            if (filterLocation[job.location] && filterSource[job.source]) {
               return (
                 <a
                   href={job.job_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  key={'job' + index}
+                  key={"job" + index}
                 >
                   <Card className="cursor-pointer hover:shadow-lg transition-shadow duration-300">
                     <CardHeader>
