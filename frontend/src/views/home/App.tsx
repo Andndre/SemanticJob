@@ -150,94 +150,92 @@ function LokerList() {
   }
 
   return (
-    <div className="text-start">
-      <div className="flex gap-3">
-        <div className="flex flex-col gap-3 w-1/4">
-          <h2 className="text-lg font-bold">Filter</h2>
-          <Card>
-            <CardContent className="pt-6">
-              <h3 className="font-bold">Location</h3>
-              <div className="flex items-center">
-                <Checkbox
-                  checked={allLocationsChecked}
-                  onCheckedChange={handleAllLocationsChange}
-                />
-                <label className="ml-2">All Locations</label>
-              </div>
-              {Object.keys(filterLocation).map((location) => (
-                <div key={location} className="flex items-center">
-                  <Checkbox
-                    checked={filterLocation[location]}
-                    onCheckedChange={() => handleLocationChange(location)}
-                  />
-                  <label className="ml-2">{location}</label>
-                </div>
-              ))}
-              <h3 className="font-bold mt-4">Source</h3>
-              <div className="flex items-center">
-                <Checkbox
-                  checked={allSourcesChecked}
-                  onCheckedChange={handleAllSourcesChange}
-                />
-                <label className="ml-2">All Sources</label>
-              </div>
-              {Object.keys(filterSource).map((source) => (
-                <div key={source} className="flex items-center">
-                  <Checkbox
-                    checked={filterSource[source]}
-                    onCheckedChange={() => handleSourceChange(source)}
-                  />
-                  <label className="ml-2">{source}</label>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-        </div>
-        <div className="flex flex-col gap-3 flex-1">
-          <h2 className="text-lg font-bold">Hasil Pencarian</h2>
-          {isEmpty && (
-            <div>
-              <img src={notfound} alt="No data" className="w-1/2 mx-auto" />
+    <div className="flex flex-col md:flex-row gap-3 w-full text-start">
+      <div className="flex flex-col gap-3 md:w-1/4 w-full">
+        <h2 className="text-lg font-bold">Filter</h2>
+        <Card>
+          <CardContent className="pt-6">
+            <h3 className="font-bold">Location</h3>
+            <div className="flex items-center">
+              <Checkbox
+                checked={allLocationsChecked}
+                onCheckedChange={handleAllLocationsChange}
+              />
+              <label className="ml-2">All Locations</label>
             </div>
-          )}
-          {jobs.map((job, index) => {
-            if (filterLocation[job.location] && filterSource[job.source]) {
-              return (
-                <a
-                  href={job.job_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  key={"job" + index}
-                >
-                  <Card className="cursor-pointer hover:shadow-lg transition-shadow duration-300">
-                    <CardHeader>
-                      <CardTitle>{job.title}</CardTitle>
-                      <CardDescription>{job.company}</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="flex items-center space-x-2">
-                        <MapPin className="w-4 h-4 text-gray-500" />
-                        <p>{job.location}</p>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <DollarSign className="w-4 h-4 text-gray-500" />
-                        <p>{job.salary}</p>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <SearchIcon className="w-4 h-4 text-gray-500" />
-                        <p>{job.source}</p>
-                      </div>
-                      <Button className="mt-4" variant="outline">
-                        Apply Now
-                      </Button>
-                    </CardContent>
-                  </Card>
-                </a>
-              );
-            }
-            return null;
-          })}
-        </div>
+            {Object.keys(filterLocation).map((location) => (
+              <div key={location} className="flex items-center">
+                <Checkbox
+                  checked={filterLocation[location]}
+                  onCheckedChange={() => handleLocationChange(location)}
+                />
+                <label className="ml-2">{location}</label>
+              </div>
+            ))}
+            <h3 className="font-bold mt-4">Source</h3>
+            <div className="flex items-center">
+              <Checkbox
+                checked={allSourcesChecked}
+                onCheckedChange={handleAllSourcesChange}
+              />
+              <label className="ml-2">All Sources</label>
+            </div>
+            {Object.keys(filterSource).map((source) => (
+              <div key={source} className="flex items-center">
+                <Checkbox
+                  checked={filterSource[source]}
+                  onCheckedChange={() => handleSourceChange(source)}
+                />
+                <label className="ml-2">{source}</label>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      </div>
+      <div className="flex flex-col gap-3 w-full flex-1">
+        <h2 className="text-lg font-bold">Hasil Pencarian</h2>
+        {isEmpty && (
+          <div>
+            <img src={notfound} alt="No data" className="w-1/2 mx-auto" />
+          </div>
+        )}
+        {jobs.map((job, index) => {
+          if (filterLocation[job.location] && filterSource[job.source]) {
+            return (
+              <a
+                href={job.job_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                key={"job" + index}
+              >
+                <Card className="cursor-pointer hover:shadow-lg transition-shadow duration-300">
+                  <CardHeader>
+                    <CardTitle>{job.title}</CardTitle>
+                    <CardDescription>{job.company}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center space-x-2">
+                      <MapPin className="w-4 h-4 text-gray-500" />
+                      <p>{job.location}</p>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <DollarSign className="w-4 h-4 text-gray-500" />
+                      <p>{job.salary}</p>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <SearchIcon className="w-4 h-4 text-gray-500" />
+                      <p>{job.source}</p>
+                    </div>
+                    <Button className="mt-4" variant="outline">
+                      Apply Now
+                    </Button>
+                  </CardContent>
+                </Card>
+              </a>
+            );
+          }
+          return null;
+        })}
       </div>
     </div>
   );
