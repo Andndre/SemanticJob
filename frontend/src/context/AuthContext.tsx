@@ -18,7 +18,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check if user is already logged in
     axios.get('http://localhost:5000/api/user', { withCredentials: true })
       .then(response => {
         setUser(response.data.username);

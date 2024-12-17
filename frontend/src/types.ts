@@ -4,4 +4,5 @@ export interface Job {
   company: string;
   location: string;
   job_url: string;
+  source: string;
 }

@@ -45,7 +45,8 @@ def get_jobs():
             "salary": result["salary"]["value"],
             "company": result["companyName"]["value"],
             "location": result["location"]["value"],
-            "job_url": result["job_url"]["value"]
+            "job_url": result["job_url"]["value"],
+            "source": result["source"]["value"]
         }
         jobs.append(job)
         
@@ -154,10 +155,11 @@ def api_home():
     paginated_jobs = jobs[start:end]
     return jsonify(paginated_jobs)
 
-@app.route("/api/search", methods=["GET"])
+@app.route("/api/search", methods=["POST"])
 @login_required
 def api_search():
-    keyword = request.args.get("keyword", "").strip()
+    data = request.get_json()
+    keyword = data.get("query", "").strip()
     if keyword:
         jobs = search_and_store_jobs(keyword)
         return jsonify(jobs)
