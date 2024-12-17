@@ -160,6 +160,8 @@ function LokerList() {
     );
   }
 
+  console.log(isEmpty)
+
   return (
     <div className="flex flex-col md:flex-row gap-3 w-full text-start">
       <div className="flex flex-col gap-3 md:w-1/4 w-full">
@@ -200,23 +202,29 @@ function LokerList() {
                 <label className="ml-2">{source}</label>
               </div>
             ))}
-            <h3 className="font-bold mt-4">Salary</h3>
-            <DualRangeSlider
-              className="mt-8"
-              label={(value) => `${(value || 0) / 1000000}Jt`}
-              min={minSalary}
-              max={maxSalary}
-              value={selectedSalary}
-              onValueChange={setSelectedSalary}
-              step={100000}
-            />
-            <div className="flex items-center mt-4">
-              <Checkbox
-                checked={includeSecretSalary}
-                onCheckedChange={handleIncludeSecretSalaryChange}
-              />
-              <label className="ml-2">Include Secret Salary</label>
-            </div>
+            {
+              !isEmpty && (
+                <>
+                  <h3 className="font-bold mt-4">Salary</h3>
+                  <DualRangeSlider
+                    className="mt-8"
+                    label={(value) => `${(value || 0) / 1000000}Jt`}
+                    min={minSalary}
+                    max={maxSalary}
+                    value={selectedSalary}
+                    onValueChange={setSelectedSalary}
+                    step={100000}
+                  />
+                  <div className="flex items-center mt-4">
+                    <Checkbox
+                      checked={includeSecretSalary}
+                      onCheckedChange={handleIncludeSecretSalaryChange}
+                    />
+                    <label className="ml-2">Include Secret Salary</label>
+                  </div>
+                </>
+              )
+            }
           </CardContent>
         </Card>
       </div>
