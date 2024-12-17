@@ -22,7 +22,6 @@ import {
 } from "@/components/ui/card";
 import { LoadingSpinner } from "@/components/custom/LoadingSpinner";
 import vintage from "@/images/undraw_vintage.svg";
-import { useState, useEffect, useMemo } from "react";
 
 function App() {
   const auth = useAuth();
