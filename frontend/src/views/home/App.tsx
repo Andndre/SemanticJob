@@ -25,6 +25,8 @@ import vintage from "@/images/undraw_vintage.svg";
 import notfound from "@/images/undraw_page_not_found.svg";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useState } from "react";
+import { Badge } from "@/components/ui/badge";
+import { DualRangeSlider } from "@/components/ui/dual-range-slider";
 
 function App() {
   const auth = useAuth();
@@ -103,9 +105,14 @@ function LokerList() {
     toggleAllLocationFilters,
     toggleAllSourceFilters,
     searched,
+    minSalary,
+    maxSalary,
+    selectedSalary,
+    setSelectedSalary,
   } = useLokerAPI();
   const [allLocationsChecked, setAllLocationsChecked] = useState(true);
   const [allSourcesChecked, setAllSourcesChecked] = useState(true);
+  const [includeSecretSalary, setIncludeSecretSalary] = useState(false);
 
   const handleLocationChange = (location: string) => {
     toggleLocationFilter(location);
@@ -123,6 +130,10 @@ function LokerList() {
   const handleAllSourcesChange = () => {
     setAllSourcesChecked(!allSourcesChecked);
     toggleAllSourceFilters(!allSourcesChecked);
+  };
+
+  const handleIncludeSecretSalaryChange = () => {
+    setIncludeSecretSalary(!includeSecretSalary);
   };
 
   if (loading) {
@@ -189,6 +200,23 @@ function LokerList() {
                 <label className="ml-2">{source}</label>
               </div>
             ))}
+            <h3 className="font-bold mt-4">Salary</h3>
+            <DualRangeSlider
+              className="mt-8"
+              label={(value) => `${(value || 0) / 1000000}Jt`}
+              min={minSalary}
+              max={maxSalary}
+              value={selectedSalary}
+              onValueChange={setSelectedSalary}
+              step={100000}
+            />
+            <div className="flex items-center mt-4">
+              <Checkbox
+                checked={includeSecretSalary}
+                onCheckedChange={handleIncludeSecretSalaryChange}
+              />
+              <label className="ml-2">Include Secret Salary</label>
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -201,38 +229,55 @@ function LokerList() {
         )}
         {jobs.map((job, index) => {
           if (filterLocation[job.location] && filterSource[job.source]) {
-            return (
-              <a
-                href={job.job_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                key={"job" + index}
-              >
-                <Card className="cursor-pointer hover:shadow-lg transition-shadow duration-300">
-                  <CardHeader>
-                    <CardTitle>{job.title}</CardTitle>
-                    <CardDescription>{job.company}</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center space-x-2">
-                      <MapPin className="w-4 h-4 text-gray-500" />
-                      <p>{job.location}</p>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <DollarSign className="w-4 h-4 text-gray-500" />
-                      <p>{job.salary}</p>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <SearchIcon className="w-4 h-4 text-gray-500" />
-                      <p>{job.source}</p>
-                    </div>
-                    <Button className="mt-4" variant="outline">
-                      Apply Now
-                    </Button>
-                  </CardContent>
-                </Card>
-              </a>
-            );
+            const parts = job.salary.replace(" – ", " - ").split(" - ").map((part) => {
+              return parseInt(part.replace("Rp", "").replace(/\s/g, "").replace(/\./g, ""), 10)
+            });
+
+            const jobMinSalary = parts[0] || 0;
+            const jobMaxSalary = parts[1] || jobMinSalary;
+
+            if (
+              (job.salary === "Secret" && includeSecretSalary) ||
+              (jobMinSalary >= selectedSalary[0] && jobMinSalary <= selectedSalary[1]) ||
+              (jobMaxSalary >= selectedSalary[0] && jobMaxSalary <= selectedSalary[1])
+            ) {
+              return (
+                <a
+                  href={job.job_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  key={"job" + index}
+                >
+                  <Card className="cursor-pointer hover:shadow-lg transition-shadow duration-300">
+                    <CardHeader>
+                      <CardTitle>{job.title}</CardTitle>
+                      <CardDescription>{job.company}</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex items-center space-x-2">
+                        <MapPin className="w-4 h-4 text-gray-500" />
+                        <p>{job.location}</p>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <DollarSign className="w-4 h-4 text-gray-500" />
+                        {job.salary === "Secret" ? (
+                          <Badge variant={"destructive"}>{job.salary}</Badge>
+                        ) : (
+                          <p>{job.salary}</p>
+                        )}
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <SearchIcon className="w-4 h-4 text-gray-500" />
+                        <p>{job.source}</p>
+                      </div>
+                      <Button className="mt-4" variant="outline">
+                        Apply Now
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </a>
+              );
+            }
           }
           return null;
         })}

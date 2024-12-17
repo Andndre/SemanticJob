@@ -13,6 +13,10 @@ interface LokerAPIContextType {
   toggleSourceFilter: (source: string) => void;
   toggleAllLocationFilters: (checked: boolean) => void;
   toggleAllSourceFilters: (checked: boolean) => void;
+  minSalary: number;
+  maxSalary: number;
+  selectedSalary: number[];
+  setSelectedSalary: React.Dispatch<React.SetStateAction<number[]>>;
   searched: boolean;
 }
 
@@ -28,6 +32,9 @@ export const LokerAPIProvider: React.FC<{ children: React.ReactNode }> = ({
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
+  const [minSalary, setMinSalary] = useState(0);
+  const [maxSalary, setMaxSalary] = useState(0);
+  const [selectedSalary, setSelectedSalary] = useState([0, 0]);
   const [filterLocation, setFilterLocation] = useState<{
     [key: string]: boolean;
   }>({});
@@ -53,6 +60,25 @@ export const LokerAPIProvider: React.FC<{ children: React.ReactNode }> = ({
         }
       );
       const data = response.data as Job[];
+
+      // Filter out jobs with salary "Secret" and set minSalary and maxSalary
+      const salaries = data
+        .filter((job) => job.salary !== "Secret")
+        .map((job) => job.salary);
+
+      let min = Infinity;
+      let max = -Infinity;
+      salaries.forEach((salary) => {
+        const parts = salary.replace(" – ", " - ").split(" - ").map((part) => {
+          return parseInt(part.replace("Rp", "").replace(/\s/g, "").replace(/\./g, ""), 10)
+        });
+        min = Math.min(min, ...parts);
+        max = Math.max(max, ...parts);
+      });
+
+      setMinSalary(min);
+      setMaxSalary(max);
+      setSelectedSalary([min, max]);
 
       setJobs(data);
 
@@ -128,7 +154,11 @@ export const LokerAPIProvider: React.FC<{ children: React.ReactNode }> = ({
         toggleSourceFilter,
         toggleAllLocationFilters,
         toggleAllSourceFilters,
-        searched
+        searched,
+        minSalary,
+        maxSalary,
+        selectedSalary,
+        setSelectedSalary,
       }}
     >
       {children}
