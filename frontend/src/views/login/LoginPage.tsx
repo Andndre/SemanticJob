@@ -80,28 +80,6 @@ export default function LoginPage() {
             <p>Don't have an account? <a className='underline' href='/auth/register'>Register here</a>.</p>
         </CardFooter>
       </Card>
-      {/* <h1>Login Page</h1>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="username">Username:</label>
-          <input
-            type="text"
-            id="username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-          />
-        </div>
-        <div>
-          <label htmlFor="password">Password:</label>
-          <input
-            type="password"
-            id="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </div>
-        <button type="submit">Login</button>
-      </form> */}
     </div>
   );
 }
