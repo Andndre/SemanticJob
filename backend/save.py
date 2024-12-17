@@ -27,7 +27,7 @@ class Company:
         return company_uri
 
 class Job:
-    def __init__(self, title, company, job_url, source, salary="No salary"):
+    def __init__(self, title, company, job_url, source, salary="Secret"):
         self.title = title
         self.company = company
         self.salary = salary
@@ -117,12 +117,12 @@ def scrape_kitalulus(keyword=None):
 
             company_name = extract_text(company_element, "No company")
             location = extract_text(location_element, "No location")
-            salary = extract_text(salary_element, "No salary")
+            if len(location.split(', ')) == 2:
+                location = location.split(', ')[1]
+            salary = extract_text(salary_element, "Secret")
             if "Rp" not in salary:
-                salary = "No salary"
+                salary = "Secret"
             
-            print(job_title, company_name, location, salary, job_url)
-
             company = Company(company_name, location)
             job = Job(job_title, company, job_url, "KitaLulus", salary)
             job.to_rdf()
@@ -158,7 +158,7 @@ def scrape_jobstreet(keyword=None):
             title = extract_text(item.find('a', {'data-automation': 'jobTitle'}), "Invalid")
             company_name = extract_text(item.find('a', {'data-automation': 'jobCompany'}), "Invalid")
             location = extract_text(item.find('span', {'data-automation': 'jobCardLocation'}), "Invalid")
-            salary = extract_text(item.find('span', {'data-automation': 'jobSalary'}), "No salary")
+            salary = extract_text(item.find('span', {'data-automation': 'jobSalary'}), "Secret")
 
             company = Company(name=company_name, location=location)
             job = Job(title=title, company=company, job_url=job_url, source="Jobstreet", salary=salary)
@@ -180,8 +180,8 @@ def scrape_jobstreet(keyword=None):
 def search_and_store_jobs(keyword=None):
     jobs = []
     # jobs.extend(scrape_kemnaker(keyword))
-    jobs.extend(scrape_kitalulus(keyword))
     jobs.extend(scrape_jobstreet(keyword))
+    jobs.extend(scrape_kitalulus(keyword))
     
     # Serialize and upload to GraphDB
     graphdb_url = os.getenv("GRAPHDB_ENDPOINT") + '/repositories/lokerku' + "/statements"
