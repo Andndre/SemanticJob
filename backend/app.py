@@ -2,6 +2,7 @@ import os
 import sqlite3
 from flask import Flask, render_template, request, jsonify, g, session, redirect, url_for
 from flask_cors import CORS
+from flask_caching import Cache
 from werkzeug.security import generate_password_hash, check_password_hash
 from dotenv import load_dotenv
 load_dotenv()
@@ -15,6 +16,9 @@ cors = CORS(app, supports_credentials=True)
 app.config['CORS_HEADERS'] = 'Content-Type'
 app.config['DATABASE'] = os.path.join(os.getcwd(), 'users.db')
 app.config['SECRET_KEY'] = os.urandom(24)
+app.config['CACHE_TYPE'] = 'simple'
+app.config['CACHE_DEFAULT_TIMEOUT'] = 300
+cache = Cache(app)
 
 # Konfigurasi GraphDB
 GRAPHDB_ENDPOINT = os.getenv("GRAPHDB_ENDPOINT") + '/repositories/lokerku'
@@ -139,7 +143,7 @@ def get_user_info():
     cursor.execute('SELECT username FROM users WHERE id = ?', (user_id,))
     user = cursor.fetchone()
 
-    if user is None:
+    if user is None: # Not gonna happen
         return jsonify({"error": "User not found"}), 404
 
     return jsonify({"username": user[0]}), 200
@@ -155,11 +159,11 @@ def api_home():
     paginated_jobs = jobs[start:end]
     return jsonify(paginated_jobs)
 
-@app.route("/api/search", methods=["POST"])
+@app.route("/api/search", methods=["GET"])
 @login_required
+@cache.cached(timeout=50) # Cache the result for 50 seconds
 def api_search():
-    data = request.get_json()
-    keyword = data.get("query", "").strip()
+    keyword = request.args.get("query", "").strip()
     if keyword:
         jobs = search_and_store_jobs(keyword)
         return jsonify(jobs)

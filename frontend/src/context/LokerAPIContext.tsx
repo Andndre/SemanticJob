@@ -49,11 +49,11 @@ export const LokerAPIProvider: React.FC<{ children: React.ReactNode }> = ({
     setFilterLocation({});
     setLoading(true);
     try {
-      const response = await axios.post(
-        "http://localhost:5000/api/search",
-        { query },
+      const response = await axios.get(
+        "http://localhost:5000/api/search?query=" + query,
         {
           headers: {
+            "Accept": "application/json",
             "Content-Type": "application/json",
           },
           withCredentials: true,
@@ -69,8 +69,8 @@ export const LokerAPIProvider: React.FC<{ children: React.ReactNode }> = ({
       let min = Infinity;
       let max = -Infinity;
       salaries.forEach((salary) => {
-        const parts = salary.replace("–", "-").split("-").map((part) => {
-          return parseInt(part.replace("Rp", "").replace(/\s/g, "").replace(/\./g, ""), 10)
+        const parts = salary.split("-").map((part) => {
+          return parseInt(part, 10)
         });
         min = Math.min(min, ...parts);
         max = Math.max(max, ...parts);

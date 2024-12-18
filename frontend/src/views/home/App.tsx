@@ -85,8 +85,8 @@ function FormSearch() {
             </FormItem>
           )}
         />
-        <Button type="submit">
-          <Search />
+        <Button type="submit" disabled={lokerAPI.loading}>
+          {lokerAPI.loading ? <LoadingSpinner /> : <Search />}
           <span className="sr-only">Search</span>
         </Button>
       </form>
