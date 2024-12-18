@@ -63,7 +63,6 @@ function FormSearch() {
   const lokerAPI = useLokerAPI();
 
   async function onSubmit(values: FormValues) {
-    console.log(values);
     await lokerAPI.fetchJobs(values.query);
   }
 
@@ -159,11 +158,6 @@ function LokerList() {
         </p>
       </div>
     );
-  }
-
-  console.log(isEmpty)
-  if (!isEmpty) {
-    console.log(jobs)
   }
 
   return (
