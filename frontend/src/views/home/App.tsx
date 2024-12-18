@@ -28,6 +28,13 @@ import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { DualRangeSlider } from "@/components/ui/dual-range-slider";
 import { convertToRupiah } from "@/lib/utils";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 function App() {
   const auth = useAuth();
@@ -63,32 +70,62 @@ function FormSearch() {
   const lokerAPI = useLokerAPI();
 
   async function onSubmit(values: FormValues) {
-    await lokerAPI.fetchJobs(values.query);
+    await lokerAPI.fetchJobs(values.query, values.type);
   }
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="flex gap-3">
+      <form onSubmit={form.handleSubmit(onSubmit)}>
+        <div className="flex gap-3">
+          <FormField
+            name="query"
+            control={form.control}
+            render={({ field }) => (
+              <FormItem className="flex-1 w-full text-start">
+                <FormControl>
+                  <Input
+                    className="bg-gray-100"
+                    placeholder="Search Job"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <Button type="submit" disabled={lokerAPI.loading}>
+            {lokerAPI.loading ? <LoadingSpinner /> : <Search />}
+            <span className="sr-only">Search</span>
+          </Button>
+        </div>
         <FormField
-          name="query"
           control={form.control}
+          name="type"
           render={({ field }) => (
-            <FormItem className="flex-1 w-full">
-              <FormControl>
-                <Input
-                  className="bg-gray-100"
-                  placeholder="Search Job"
-                  {...field}
-                />
-              </FormControl>
+            <FormItem className="mt-3 max-w-96 text-start">
+              <Select
+                onValueChange={(value) => {
+                  if (lokerAPI.searched) {
+                    lokerAPI.fetchJobs(form.getValues("query"), value);
+                  }
+                  return field.onChange(value);
+                }}
+                defaultValue={field.value}
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Pilih Metode Pencarian" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="scraping">Scraping</SelectItem>
+                  <SelectItem value="graphdb">GraphDB</SelectItem>
+                </SelectContent>
+              </Select>
               <FormMessage />
             </FormItem>
           )}
         />
-        <Button type="submit" disabled={lokerAPI.loading}>
-          {lokerAPI.loading ? <LoadingSpinner /> : <Search />}
-          <span className="sr-only">Search</span>
-        </Button>
       </form>
     </Form>
   );
@@ -200,29 +237,27 @@ function LokerList() {
                 <label className="ml-2">{source}</label>
               </div>
             ))}
-            {
-              !isEmpty && (
-                <>
-                  <h3 className="font-bold mt-4">Salary</h3>
-                  <DualRangeSlider
-                    className="mt-8"
-                    label={(value) => `${(value || 0) / 1000000}Jt`}
-                    min={minSalary}
-                    max={maxSalary}
-                    value={selectedSalary}
-                    onValueChange={setSelectedSalary}
-                    step={100000}
+            {!isEmpty && (
+              <>
+                <h3 className="font-bold mt-4">Salary</h3>
+                <DualRangeSlider
+                  className="mt-8"
+                  label={(value) => `${(value || 0) / 1000000}Jt`}
+                  min={minSalary}
+                  max={maxSalary}
+                  value={selectedSalary}
+                  onValueChange={setSelectedSalary}
+                  step={100000}
+                />
+                <div className="flex items-center mt-4">
+                  <Checkbox
+                    checked={includeSecretSalary}
+                    onCheckedChange={handleIncludeSecretSalaryChange}
                   />
-                  <div className="flex items-center mt-4">
-                    <Checkbox
-                      checked={includeSecretSalary}
-                      onCheckedChange={handleIncludeSecretSalaryChange}
-                    />
-                    <label className="ml-2">Include Secret Salary</label>
-                  </div>
-                </>
-              )
-            }
+                  <label className="ml-2">Include Secret Salary</label>
+                </div>
+              </>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -236,7 +271,7 @@ function LokerList() {
         {jobs.map((job, index) => {
           if (filterLocation[job.location] && filterSource[job.source]) {
             const parts = job.salary.split("-").map((part) => {
-              return parseInt(part, 10)
+              return parseInt(part, 10);
             });
 
             const jobMinSalary = parts[0] || 0;
@@ -244,8 +279,10 @@ function LokerList() {
 
             if (
               (job.salary === "Secret" && includeSecretSalary) ||
-              (jobMinSalary >= selectedSalary[0] && jobMinSalary <= selectedSalary[1]) ||
-              (jobMaxSalary >= selectedSalary[0] && jobMaxSalary <= selectedSalary[1])
+              (jobMinSalary >= selectedSalary[0] &&
+                jobMinSalary <= selectedSalary[1]) ||
+              (jobMaxSalary >= selectedSalary[0] &&
+                jobMaxSalary <= selectedSalary[1])
             ) {
               return (
                 <a

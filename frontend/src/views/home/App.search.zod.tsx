@@ -3,7 +3,8 @@ import { z } from "zod";
 const formSchema = z.object({
 	query: z
 		.string()
-		.min(1)
+		.min(1),
+	type: z.enum(["scraping", "graphdb"]),
 });
 
 export { formSchema };

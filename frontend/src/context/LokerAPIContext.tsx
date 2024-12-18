@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 interface LokerAPIContextType {
   jobs: Job[];
   loading: boolean;
-  fetchJobs: (query: string) => Promise<void>;
+  fetchJobs: (query: string, type: string) => Promise<void>;
   filterLocation: { [key: string]: boolean };
   filterSource: { [key: string]: boolean };
   toggleLocationFilter: (location: string) => void;
@@ -43,14 +43,14 @@ export const LokerAPIProvider: React.FC<{ children: React.ReactNode }> = ({
   );
 
   const navigate = useNavigate();
-  async function fetchJobs(query: string) {
+  async function fetchJobs(query: string, type: string) {
     setSearched(false);
     setFilterSource({});
     setFilterLocation({});
     setLoading(true);
     try {
       const response = await axios.get(
-        "http://localhost:5000/api/search?query=" + query,
+        "http://localhost:5000/api/search?query=" + query + "&type=" + type,
         {
           headers: {
             "Accept": "application/json",

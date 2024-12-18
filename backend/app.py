@@ -56,6 +56,44 @@ def get_jobs():
         
     return jobs
 
+def search_jobs(keyword=None):
+    # get jobs from GraphDB
+    sparql = SPARQLWrapper(GRAPHDB_ENDPOINT)
+
+    query = """
+    PREFIX ex: <http://example.org/ontology/>
+    SELECT DISTINCT ?title ?salary ?companyName ?location ?source ?job_url WHERE {
+        ?job a ex:Job ;
+             ex:title ?title ;
+             ex:salary ?salary ;
+             ex:company ?company ;
+             ex:source ?source ;
+             ex:job_url ?job_url .
+        ?company ex:name ?companyName ;
+                 ex:location ?location .
+        FILTER regex(?title, "%s", "i")
+    }
+    """ % keyword
+
+    sparql.setQuery(query)
+
+    sparql.setReturnFormat(JSON)
+    results = sparql.query().convert()
+
+    jobs = []
+    for result in results["results"]["bindings"]:
+        job = {
+            "title": result["title"]["value"],
+            "salary": result["salary"]["value"],
+            "company": result["companyName"]["value"],
+            "location": result["location"]["value"],
+            "job_url": result["job_url"]["value"],
+            "source": result["source"]["value"]
+        }
+        jobs.append(job)
+
+    return jobs
+
 def get_db():
     db = getattr(g, '_database', None)
     if db is None:
@@ -164,8 +202,14 @@ def api_home():
 @cache.cached(timeout=50, query_string=True) # Cache the result for 50 seconds
 def api_search():
     keyword = request.args.get("query", "").strip()
+    type = request.args.get("type", "").strip()
     if keyword:
-        jobs = search_and_store_jobs(keyword)
+        if type == 'scraping':
+            print("Searching jobs from scraping...")
+            jobs = search_and_store_jobs(keyword)
+        else:
+            print("Searching jobs from GraphDB...")
+            jobs = search_jobs(keyword)
         return jsonify(jobs)
     else:
         return jsonify([])
