@@ -161,7 +161,7 @@ def api_home():
 
 @app.route("/api/search", methods=["GET"])
 @login_required
-@cache.cached(timeout=50) # Cache the result for 50 seconds
+@cache.cached(timeout=50, query_string=True) # Cache the result for 50 seconds
 def api_search():
     keyword = request.args.get("query", "").strip()
     if keyword:
